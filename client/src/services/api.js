@@ -17,6 +17,8 @@ export async function apiRequest(path, method = 'GET', data = null, token = '') 
 
   if (!response.ok) {
     throw new Error(result.message || result.messsage || 'Request failed');
+
+    
   }
 
   return result;
