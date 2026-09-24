@@ -51,32 +51,34 @@ async function createCourse(req, res) {
     }
 }
 
-async function deleteCourse(req, res) {
-    try {
-        const courseId = req.params.id
-        const course = await Course.findById(courseId)
+async function deleteCourse(req,res){
+    try{
+        const {id}=req.params
 
-        if (!course) {
+        const course=await Course.findById(id)
+        if(!course){
             return res.status(404).send({
-                message: "Course not found"
+                message : "Course not found"
             })
         }
-
-        // Ensure the instructor owns the course or is an admin
-        if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        if(req.user.role!=="instructor" && (!course.instructor || !course.instructor.equals(req.user._id))){
             return res.status(403).send({
-                message: "Unauthorized to delete this course"
+                message : "You can only delete courses you created."
             })
         }
+        await course.deleteOne({_id:id})
 
-        await Course.findByIdAndDelete(courseId)
         return res.status(200).send({
-            message: "Course deleted successfully"
+            message : "Course deleted"
         })
-    } catch (error) {
+    }
+    catch(error){
+        console.log("Delete course error:", error);
+
         return res.status(500).send({
-            message: "Unable to delete course"
-        })
+            message: "Unable to delete course",
+            error: error.message
+        });
     }
 }
 
